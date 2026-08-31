@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070B0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<meta name="robots" content="noindex, nofollow">
+<title>Treino</title>
+<style>
+  :root{
+    --base:#070B0A; --painel:#111917; --painel2:#182320;
+    --acento:#5FB98A; --acento-esc:#17493A; --acento-luz:#A8DCC3;
+    --texto:#E9F0EC; --fraco:#90A69B; --linha:#25332E;
+    --sobre-acento:#05140E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--base); color:var(--texto);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px; line-height:1.45;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    -webkit-font-smoothing:antialiased;
+  }
+  .topo{
+    position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--base) 94%, transparent);
+    backdrop-filter:saturate(160%) blur(12px);
+    border-bottom:1px solid var(--linha);
+    padding:calc(14px + env(safe-area-inset-top)) 18px 0;
+  }
+  .marca{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+  .marca b{font-size:15px; font-weight:650; letter-spacing:-.01em}
+  .marca span{font-size:12px; color:var(--fraco)}
+  .abas{display:flex; gap:8px; overflow-x:auto; padding:12px 0 0; scrollbar-width:none}
+  .abas::-webkit-scrollbar{display:none}
+  .aba{
+    flex:0 0 auto; border:1px solid var(--linha); background:var(--painel);
+    color:var(--fraco); border-radius:999px 999px 0 0; border-bottom:none;
+    padding:9px 16px 10px; font-size:14px; font-weight:550; cursor:pointer;
+    display:flex; align-items:center; gap:8px; font-family:inherit;
+  }
+  .aba .letra{
+    font-size:12px; font-weight:750; color:var(--acento-luz);
+    background:color-mix(in srgb, var(--acento) 18%, transparent); border-radius:5px; padding:1px 6px;
+  }
+  .aba[aria-selected="true"]{background:var(--acento-esc); color:#fff; border-color:var(--acento-esc)}
+  .aba[aria-selected="true"] .letra{background:rgba(255,255,255,.18); color:#fff}
+  .aba:focus-visible{outline:2px solid var(--acento); outline-offset:2px}
+
+  .barra{height:3px; background:var(--painel2)}
+  .barra i{display:block; height:100%; width:0; background:var(--acento); transition:width .3s ease}
+
+  main{padding:18px 16px 0; max-width:640px; margin:0 auto}
+
+  .item{
+    background:var(--painel); border:1px solid var(--linha);
+    border-radius:14px; padding:16px 16px 14px; margin-bottom:12px;
+    display:grid; grid-template-columns:26px 1fr; gap:0 12px;
+  }
+  .item.ok{border-color:var(--acento); background:var(--painel2)}
+  .ord{
+    font-size:14px; font-weight:750; color:var(--fraco);
+    font-variant-numeric:tabular-nums; padding-top:1px;
+  }
+  .item.ok .ord{color:var(--acento)}
+  .nome{font-size:17px; font-weight:640; letter-spacing:-.015em; line-height:1.3}
+  .obs{grid-column:2; font-size:13px; color:var(--fraco); margin-top:6px}
+
+  .dados{grid-column:2; display:flex; gap:18px; margin-top:10px; align-items:baseline}
+  .dado{display:flex; align-items:baseline; gap:5px}
+  .dado b{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--acento-luz)}
+  .dado span{font-size:12px; color:var(--fraco)}
+
+  .series{grid-column:2; margin-top:13px; display:flex; flex-direction:column; gap:8px}
+  .serie{display:flex; align-items:center; gap:10px}
+  .pt{
+    flex:0 0 auto; width:46px; height:46px; border-radius:13px;
+    border:1.5px solid var(--linha); background:var(--painel2); color:var(--fraco);
+    font-size:15px; font-weight:700; font-family:inherit; cursor:pointer;
+    font-variant-numeric:tabular-nums;
+    transition:transform .12s ease, background .12s ease, color .12s ease;
+  }
+  .pt[aria-pressed="true"]{background:var(--acento); border-color:var(--acento); color:var(--sobre-acento)}
+  .pt:active{transform:scale(.9)}
+  .pt:focus-visible{outline:2px solid var(--acento); outline-offset:2px}
+  .serie input{
+    flex:1 1 auto; min-width:0; background:var(--painel2); border:1px solid var(--linha);
+    border-radius:11px; color:var(--texto); padding:12px 13px; font-size:16px;
+    font-family:inherit; font-variant-numeric:tabular-nums;
+  }
+  .serie input:focus{outline:none; border-color:var(--acento); background:var(--base)}
+  .serie input::placeholder{color:var(--fraco); opacity:.6}
+
+  .fim{
+    text-align:center; color:var(--fraco); font-size:13px;
+    padding:22px 0 6px; border-top:1px solid var(--linha); margin-top:20px;
+  }
+  .zerar{
+    background:none; border:1px solid var(--linha); color:var(--fraco);
+    border-radius:10px; padding:9px 15px; font-size:13px; font-family:inherit;
+    cursor:pointer; margin-top:12px;
+  }
+  .zerar:active{background:var(--painel)}
+  .zerar.confirmar{border-color:var(--acento); color:var(--acento-luz)}
+  .enviar{
+    display:block; width:100%; background:var(--acento-esc); border:1px solid var(--acento);
+    color:#fff; border-radius:12px; padding:15px 18px; font-size:15.5px;
+    font-weight:640; font-family:inherit; cursor:pointer; margin-bottom:10px;
+  }
+  .enviar:active{filter:brightness(.85)}
+  .enviar.feito{background:var(--acento); border-color:var(--acento); color:var(--sobre-acento)}
+  .dica{font-size:12.5px; color:var(--fraco); margin-bottom:16px}
+  .sobreposicao{
+    position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.72);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .caixa{
+    background:var(--painel); border:1px solid var(--linha); border-radius:16px;
+    padding:18px; width:100%; max-width:520px;
+  }
+  .caixa p{font-size:13.5px; color:var(--fraco); margin-bottom:12px; text-align:left}
+  .caixa textarea{
+    width:100%; height:46vh; background:var(--painel2); border:1px solid var(--linha);
+    border-radius:11px; color:var(--texto); padding:12px; font-size:14px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; resize:none;
+  }
+  .caixa button{
+    width:100%; margin-top:12px; background:var(--acento); border:none;
+    color:var(--sobre-acento); border-radius:11px; padding:14px; font-size:15px;
+    font-weight:640; font-family:inherit; cursor:pointer;
+  }
+
+  .cron{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    background:var(--acento-esc); border-top:1px solid var(--acento);
+    padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+    display:none; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .cron.on{display:flex}
+  .cron .t{font-size:30px; font-weight:750; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+  .cron .l{font-size:12.5px; color:var(--acento-luz)}
+  .cron button{
+    background:rgba(255,255,255,.16); border:none; color:#fff; border-radius:10px;
+    padding:11px 17px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .cron.zero{background:var(--acento); border-top-color:var(--acento); color:var(--sobre-acento)}
+  .cron.zero .l{color:var(--sobre-acento); opacity:.72}
+  .cron.zero button{background:rgba(0,0,0,.2); color:var(--sobre-acento)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="marca"><b>Bruno Jandrey</b><span>Bloco 1 &middot; semanas 1 a 4</span></div>
+  <div class="abas" role="tablist" id="abas"></div>
+</header>
+<div class="barra"><i id="barra"></i></div>
+<main id="lista"></main>
+
+<div class="cron" id="cron">
+  <div><div class="t" id="cronT">0:00</div><div class="l" id="cronL">descanso</div></div>
+  <button id="cronX" type="button">Pular</button>
+</div>
+
+<script>
+const DADOS = {"codigo": "02", "sessoes": [{"letra": "A", "rotulo": "Inferior", "itens": [{"n": 1, "ex": "Cadeira extensora", "s": 3, "rep": "12", "desc": 60, "obs": "Se doer, não ir até a extensão total — parar antes do ângulo que incomoda"}, {"n": 2, "ex": "Leg press 45°", "s": 3, "rep": "12", "desc": 120, "obs": "Amplitude até onde o joelho fica sem dor"}, {"n": 3, "ex": "Agachamento no Smith", "s": 3, "rep": "12", "desc": 120, "obs": ""}, {"n": 4, "ex": "Cadeira adutora", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 5, "ex": "Panturrilha sentado", "s": 3, "rep": "12", "desc": 60, "obs": "Progressão lenta — cirurgia prévia de Aquiles"}]}, {"letra": "B", "rotulo": "Peito, ombro e tríceps", "itens": [{"n": 1, "ex": "Aquecimento de manguito rotador (polia, elástico ou halter leve)", "s": 2, "rep": "15", "desc": 30, "obs": ""}, {"n": 2, "ex": "Supino máquina", "s": 3, "rep": "12", "desc": 90, "obs": ""}, {"n": 3, "ex": "Fly (voador)", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 4, "ex": "Elevação lateral com halteres", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 5, "ex": "Desenvolvimento com halteres ou na máquina", "s": 3, "rep": "12", "desc": 90, "obs": ""}, {"n": 6, "ex": "Tríceps corda na polia", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 7, "ex": "Tríceps francês na polia", "s": 3, "rep": "12", "desc": 60, "obs": ""}]}, {"letra": "C", "rotulo": "Posterior e glúteo", "itens": [{"n": 1, "ex": "Cadeira abdutora", "s": 3, "rep": "12", "desc": 60, "obs": "Glúteo médio — apoia o joelho"}, {"n": 2, "ex": "Elevação pélvica na máquina", "s": 3, "rep": "12", "desc": 90, "obs": ""}, {"n": 3, "ex": "Afundo no Smith", "s": 3, "rep": "12 cada", "desc": 90, "obs": ""}, {"n": 4, "ex": "Cadeira flexora", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 5, "ex": "Flexora unilateral em pé", "s": 3, "rep": "12 cada", "desc": 60, "obs": ""}, {"n": 6, "ex": "Panturrilha com joelho estendido (leg, Smith ou máquina)", "s": 3, "rep": "12", "desc": 60, "obs": "Progressão lenta — cirurgia prévia de Aquiles"}]}, {"letra": "D", "rotulo": "Costas", "itens": [{"n": 1, "ex": "Aquecimento de manguito rotador (polia, elástico ou halter leve)", "s": 2, "rep": "15", "desc": 30, "obs": ""}, {"n": 2, "ex": "Puxada alta aberta pegada pronada", "s": 3, "rep": "12", "desc": 90, "obs": ""}, {"n": 3, "ex": "Remada articulada pegada aberta pronada", "s": 3, "rep": "12", "desc": 90, "obs": ""}, {"n": 4, "ex": "Remada alta na polia", "s": 3, "rep": "12", "desc": 60, "obs": ""}, {"n": 5, "ex": "Crucifixo inverso na polia unilateral", "s": 3, "rep": "12 cada", "desc": 60, "obs": ""}]}]};
+const CHAVE = "treino-02";
+
+let mem = {};
+const store = {
+  get(){ try { return JSON.parse(localStorage.getItem(CHAVE) || "{}"); } catch(e){ return mem; } },
+  set(v){ mem = v; try { localStorage.setItem(CHAVE, JSON.stringify(v)); } catch(e){} }
+};
+let est = store.get();
+let atual = 0;
+
+const abas  = document.getElementById("abas");
+const lista = document.getElementById("lista");
+const barra = document.getElementById("barra");
+
+DADOS.sessoes.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.className = "aba"; b.type = "button"; b.setAttribute("role","tab");
+  b.innerHTML = (s.letra ? '<span class="letra">'+s.letra+'</span>' : '') + s.rotulo;
+  b.onclick = () => { if (atual === i) return; atual = i; render(); window.scrollTo({top:0}); };
+  abas.appendChild(b);
+});
+
+const k = (si, ei) => si + ":" + ei;
+function pegar(si, ei){
+  const d = est[k(si,ei)];
+  if (!d) return {series:[], pesos:[]};
+  return {series: d.series || [], pesos: d.pesos || []};
+}
+
+function progresso(){
+  const s = DADOS.sessoes[atual];
+  let feitas = 0, total = 0;
+  s.itens.forEach((it, ei) => {
+    total += it.s;
+    feitas += pegar(atual, ei).series.filter(Boolean).length;
+  });
+  barra.style.width = total ? (feitas/total*100)+"%" : "0";
+  const fim = document.getElementById("fimTexto");
+  if (fim) fim.textContent = feitas === total
+    ? "Treino concluído. Mande as cargas no WhatsApp."
+    : (total - feitas) + (total - feitas === 1 ? " série restante" : " séries restantes");
+}
+
+function render(){
+  [...abas.children].forEach((b,i)=>b.setAttribute("aria-selected", i===atual ? "true":"false"));
+  const s = DADOS.sessoes[atual];
+  lista.innerHTML = "";
+
+  s.itens.forEach((it, ei) => {
+    const d = pegar(atual, ei);
+    const div = document.createElement("div");
+    div.className = "item";
+
+    let h = '<div class="ord">'+it.n+'</div><div class="nome">'+it.ex+'</div>';
+    if (it.obs) h += '<div class="obs">'+it.obs+'</div>';
+    h += '<div class="dados">'
+       + '<div class="dado"><b>'+it.s+'</b><span>séries</span></div>'
+       + '<div class="dado"><b>'+it.rep+'</b><span>reps</span></div>'
+       + (it.desc ? '<div class="dado"><b>'+it.desc+'s</b><span>descanso</span></div>' : '')
+       + '</div><div class="series"></div>';
+    div.innerHTML = h;
+
+    const box = div.querySelector(".series");
+    for (let j = 0; j < it.s; j++){
+      const linha = document.createElement("div");
+      linha.className = "serie";
+
+      const p = document.createElement("button");
+      p.className = "pt"; p.type = "button"; p.textContent = j+1;
+      p.setAttribute("aria-pressed", d.series[j] ? "true":"false");
+      p.setAttribute("aria-label", "Série "+(j+1)+" de "+it.s);
+
+      const inp = document.createElement("input");
+      inp.type = "text"; inp.inputMode = "decimal";
+      inp.placeholder = "peso da série " + (j+1);
+      inp.value = d.pesos[j] || "";
+      inp.setAttribute("aria-label", "Peso da série "+(j+1));
+
+      p.onclick = () => {
+        const cur = pegar(atual, ei);
+        cur.series = cur.series.slice(); cur.pesos = cur.pesos.slice();
+        cur.series[j] = !cur.series[j];
+        est[k(atual,ei)] = cur; store.set(est);
+        p.setAttribute("aria-pressed", cur.series[j] ? "true":"false");
+        div.classList.toggle("ok", cur.series.filter(Boolean).length === it.s);
+        progresso();
+        if (cur.series[j] && it.desc) descansar(it.desc);
+      };
+      inp.oninput = (e) => {
+        const cur = pegar(atual, ei);
+        cur.pesos = cur.pesos.slice();
+        cur.pesos[j] = e.target.value;
+        est[k(atual,ei)] = cur; store.set(est);
+      };
+
+      linha.appendChild(p); linha.appendChild(inp);
+      box.appendChild(linha);
+    }
+    if (d.series.filter(Boolean).length === it.s && it.s > 0) div.classList.add("ok");
+    lista.appendChild(div);
+  });
+
+  const fim = document.createElement("div");
+  fim.className = "fim";
+  const txt = document.createElement("div");
+  txt.id = "fimTexto";
+  fim.appendChild(txt);
+
+  const env = document.createElement("button");
+  env.className = "enviar"; env.type = "button";
+  env.textContent = "Enviar os pesos para o Bruno";
+  env.onclick = () => enviarRelatorio(env);
+  fim.appendChild(env);
+
+  const dica = document.createElement("div");
+  dica.className = "dica";
+  dica.textContent = "Abre o WhatsApp com os pesos desta sessão já escritos. Envie antes de zerar.";
+  fim.appendChild(dica);
+
+  const z = document.createElement("button");
+  z.className = "zerar"; z.type = "button"; z.textContent = "Zerar esta sessão";
+  let armado = false, tmr = null;
+  z.onclick = () => {
+    if (!armado){
+      armado = true;
+      z.textContent = "Toque de novo para confirmar";
+      z.classList.add("confirmar");
+      tmr = setTimeout(() => {
+        armado = false; z.textContent = "Zerar esta sessão"; z.classList.remove("confirmar");
+      }, 4000);
+      return;
+    }
+    clearTimeout(tmr); armado = false;
+    DADOS.sessoes[atual].itens.forEach((_, ei) => { delete est[k(atual, ei)]; });
+    store.set(est);
+    render();
+  };
+  fim.appendChild(z);
+  lista.appendChild(fim);
+  progresso();
+}
+
+function resumoSessao(){
+  const s = DADOS.sessoes[atual];
+  let feitas = 0, total = 0, comPeso = 0;
+  s.itens.forEach((it, ei) => {
+    const d = pegar(atual, ei);
+    total += it.s;
+    feitas += d.series.filter(Boolean).length;
+    comPeso += d.pesos.filter(p => (p || "").trim() !== "").length;
+  });
+  return {feitas, total, comPeso};
+}
+
+function montarRelatorio(){
+  const s = DADOS.sessoes[atual];
+  const hoje = new Date().toLocaleDateString("pt-BR");
+  const r = resumoSessao();
+  const linhas = [];
+  linhas.push("TREINO " + DADOS.codigo + " \u00b7 " + s.rotulo + " \u00b7 " + hoje);
+  linhas.push(r.feitas + " de " + r.total + " s\u00e9ries conclu\u00eddas");
+  linhas.push("");
+
+  s.itens.forEach((it, ei) => {
+    const d = pegar(atual, ei);
+    const ok = d.series.filter(Boolean).length;
+    const pesos = [];
+    for (let j = 0; j < it.s; j++){
+      const p = (d.pesos[j] || "").trim();
+      pesos.push(p ? p : "\u2014");
+    }
+    const temPeso = pesos.some(p => p !== "\u2014");
+
+    linhas.push(it.n + ". " + it.ex + " (" + it.s + "x" + it.rep + ")");
+    if (ok === 0 && !temPeso){
+      linhas.push("   n\u00e3o fiz");
+    } else if (temPeso){
+      linhas.push("   " + pesos.join(" / ") + " kg   \u00b7   " + ok + "/" + it.s + " s\u00e9ries");
+    } else {
+      linhas.push("   " + ok + "/" + it.s + " s\u00e9ries \u00b7 sem peso anotado");
+    }
+  });
+
+  linhas.push("");
+  linhas.push("Enviado pela p\u00e1gina do treino.");
+  return linhas.join("\n");
+}
+
+function avisar(botao, texto, ms){
+  const antes = botao.dataset.rotulo || botao.textContent;
+  botao.dataset.rotulo = antes;
+  botao.textContent = texto;
+  botao.classList.add("feito");
+  clearTimeout(botao._t);
+  botao._t = setTimeout(() => {
+    botao.textContent = botao.dataset.rotulo;
+    botao.classList.remove("feito");
+  }, ms || 3500);
+}
+
+function caixaTexto(texto){
+  const fundo = document.createElement("div");
+  fundo.className = "sobreposicao";
+  const cx = document.createElement("div");
+  cx.className = "caixa";
+  const p = document.createElement("p");
+  p.textContent = "Segure o dedo no texto, escolha Selecionar tudo e Copiar. Depois cole no WhatsApp.";
+  const ta = document.createElement("textarea");
+  ta.value = texto; ta.readOnly = true;
+  const bt = document.createElement("button");
+  bt.type = "button"; bt.textContent = "Fechar";
+  bt.onclick = () => fundo.remove();
+  cx.appendChild(p); cx.appendChild(ta); cx.appendChild(bt);
+  fundo.appendChild(cx);
+  document.body.appendChild(fundo);
+}
+
+async function enviarRelatorio(botao){
+  const r = resumoSessao();
+  if (r.feitas === 0 && r.comPeso === 0){
+    avisar(botao, "Nada registrado nesta sess\u00e3o ainda");
+    return;
+  }
+
+  const texto = montarRelatorio();
+
+  if (navigator.share){
+    try {
+      await navigator.share({ text: texto });
+      avisar(botao, "Enviado");
+      return;
+    } catch(e){
+      if (e && e.name === "AbortError") return;
+    }
+  }
+
+  try {
+    const w = window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
+    if (w) return;
+  } catch(e){}
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    avisar(botao, "Copiado \u2014 cole no WhatsApp");
+    return;
+  } catch(e){}
+
+  caixaTexto(texto);
+}
+
+let tid = null;
+const cron  = document.getElementById("cron");
+const cronT = document.getElementById("cronT");
+const cronL = document.getElementById("cronL");
+document.getElementById("cronX").onclick = parar;
+
+function parar(){ clearInterval(tid); cron.classList.remove("on","zero"); }
+
+function descansar(seg){
+  clearInterval(tid);
+  cron.classList.add("on"); cron.classList.remove("zero");
+  cronL.textContent = "descanso";
+  let t = seg, fim = Date.now() + seg*1000;
+  mostrar(t);
+  tid = setInterval(() => {
+    t = Math.round((fim - Date.now())/1000);
+    mostrar(t);
+    if (t <= 0){
+      clearInterval(tid);
+      cron.classList.add("zero");
+      cronL.textContent = "pode ir para a próxima série";
+      apitar();
+      setTimeout(parar, 12000);
+    }
+  }, 250);
+}
+function mostrar(t){
+  const v = Math.max(t,0), m = Math.floor(v/60), s = v%60;
+  cronT.textContent = m + ":" + String(s).padStart(2,"0");
+}
+function apitar(){
+  try{
+    const C = window.AudioContext || window.webkitAudioContext; if(!C) return;
+    const c = new C(), o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = 880; o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.25, c.currentTime + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + .5);
+    o.start(); o.stop(c.currentTime + .5);
+  }catch(e){}
+}
+render();
+</script>
+</body>
+</html>
